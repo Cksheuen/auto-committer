@@ -1,7 +1,8 @@
 use reqwest::Client;
-use std::error::Error;
+use std::{error::Error, fmt::format};
 use std::fs;
 use walkdir::WalkDir;
+use std::env;
 
 use super::{EmbeddingRequest, EmbeddingResponse};
 
@@ -50,8 +51,9 @@ pub async fn fetch_embedding(client: &Client, text: &str) -> Result<Vec<f32>, Bo
         model: "nomic-embed-text",
         prompt: text,
     };
+    let ollama_host = env::var("OLLAMA_SERVER_HOST").unwrap_or_else(|_| "http://localhost:11434".to_string());
     let res = client
-        .post("http://localhost:11434/api/embeddings")
+        .post(format!("{}/api/embeddings", ollama_host))
         .json(&payload)
         .send()
         .await?
